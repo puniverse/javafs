@@ -1,6 +1,5 @@
 package co.paralleluniverse.javafs;
 
-import co.paralleluniverse.javafs.JavaFS;
 import com.google.common.jimfs.Jimfs;
 import java.nio.file.FileSystem;
 import java.nio.file.Paths;
