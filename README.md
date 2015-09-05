@@ -40,7 +40,7 @@ with some code copied from [jnr-fuse], by Sergey Tselovalnikov, made to work wit
 
 ```
 Copyright (c) 2015 Parallel Universe
-Copyright (c) 2012-2015 Etienne Perot.
+Copyright (c) 2012-2015 Etienne Perot
 Copyright (c) 2015 Sergey Tselovalnikov
 
 Redistribution and use in source and binary forms, with or without modification, are
