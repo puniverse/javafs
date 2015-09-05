@@ -1,0 +1,16 @@
+.DS_Store
+/dist/
+/out/
+_site/
+/docs/javadoc/
+.idea/
+*.iml
+/artifacts
+/nbproject/private/
+/.nb-gradle
+/build
+/*/build/
+.gradle/
+.nb-gradle-properties
+Gemfile.lock
+/push_docs.sh

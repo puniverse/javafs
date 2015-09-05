@@ -1,0 +1,138 @@
+plugins {
+    id 'java'
+    id 'maven'
+    id 'signing'
+}
+
+sourceCompatibility = '1.7'
+targetCompatibility = '1.7'
+
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+group               = "co.paralleluniverse"
+version             = "0.1.0-SNAPSHOT"
+status              = "integration"
+description         = "Java FileSystem as FUSE"
+ext.url             = "http://puniverse.github.com/jfuse"
+ext.vendor          = "Parallel Universe Software Co."
+ext.licenseName     = "GNU General Public License, version 2, with the Classpath Exception"
+ext.licenseUrl      = "http://openjdk.java.net/legal/gplv2+ce.html"
+ext.scmUrl          = "https://github.com/puniverse/jfuse"
+ext.scmConnection   = "https://github.com/puniverse/jfuse.git"
+
+ext.distDir         = "$buildDir/dist"
+ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'com.github.jnr:jnr-ffi:2.0.3'    
+    compile 'com.github.jnr:jnr-posix:3.0.17'
+    
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.truth0:truth:0.23'
+    testCompile 'com.google.jimfs:jimfs:1.0'
+}
+
+tasks.withType(JavaExec) {
+    classpath += sourceSets.test.runtimeClasspath
+}
+
+javadoc {
+    options {
+        links = [ "http://docs.oracle.com/javase/7/docs/api/" ]
+        noDeprecated = true
+        addStringOption('public', '-quiet')
+    }
+    excludes = [
+        "co/paralleluniverse/fuse/**",
+        "jnr/**",
+    ]
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives jar
+    archives sourcesJar
+    archives javadocJar
+}
+
+signing {
+    required { isReleaseVersion && gradle.taskGraph.hasTask("uploadArchives") }
+    sign configurations.archives
+}
+
+if (!project.hasProperty("sonatypeUsername") || !project.hasProperty("sonatypePassword")) {
+    println "sonatype username or password not set"
+    ext.sonatypeUsername = ""
+    ext.sonatypePassword = ""
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { deployment -> signing.signPom(deployment) }
+
+            repository(
+                url: (isReleaseVersion ?
+	                        "https://oss.sonatype.org/service/local/staging/deploy/maven2" :
+	                        "https://oss.sonatype.org/content/repositories/snapshots")) {
+                // User and Password are taken from ~/.gradle/gradle.properties
+                authentication(userName: project.sonatypeUsername, password: project.sonatypePassword)
+            }
+            pom.project {
+                name project.name
+                packaging 'jar'
+                description project.description
+                url project.url
+                scm {
+                    url project.scmUrl
+                    connection project.scmConnection
+                    developerConnection project.scmConnection
+                }
+                licenses {
+                    license {
+                        name project.licenseName
+                        url project.licenseUrl
+                        distribution 'repo'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'pron'
+                        name 'Ron Pressler'
+                    }
+                }
+            }
+        }
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.4'
+}
+
+
+task('run', type: JavaExec, dependsOn:[testClasses]) {
+    classpath = sourceSets.main.runtimeClasspath + sourceSets.test.runtimeClasspath
+    
+    main = 'co.paralleluniverse.javafs.Main'
+    
+    if(project.hasProperty('args')){
+        args project.args.split('\\s+')
+    }
+    
+    // systemProperty 'jnr.ffi.compile.dump', 'true'
+}
+
