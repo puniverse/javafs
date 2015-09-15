@@ -1,5 +1,6 @@
 package co.paralleluniverse.javafs;
 
+import co.paralleluniverse.filesystem.FileSystemAdapter;
 import java.io.IOException;
 import java.nio.file.FileStore;
 import java.nio.file.FileSystem;
@@ -14,77 +15,17 @@ import java.util.Set;
  *
  * @author pron
  */
-class ReadOnlyFileSystem extends FileSystem {
-    private final FileSystem fs;
-    private final FileSystemProvider provider;
-
+class ReadOnlyFileSystem extends FileSystemAdapter {
     public ReadOnlyFileSystem(FileSystem fs) {
-        this.fs = fs;
-        this.provider = new ReadOnlyFileSystemProvider(fs.provider());
+        super(fs, new ReadOnlyFileSystemProvider(fs.provider()));
+    }
+
+    ReadOnlyFileSystem(FileSystem fs, FileSystemProvider fsp) {
+        super(fs, fsp);
     }
 
     @Override
     public boolean isReadOnly() {
         return true;
-    }
-
-    @Override
-    public String toString() {
-        return super.toString();
-    }
-    
-    @Override
-    public FileSystemProvider provider() {
-        return provider;
-    }
-
-    @Override
-    public void close() throws IOException {
-        fs.close();
-    }
-
-    @Override
-    public boolean isOpen() {
-        return fs.isOpen();
-    }
-
-    @Override
-    public String getSeparator() {
-        return fs.getSeparator();
-    }
-
-    @Override
-    public Iterable<Path> getRootDirectories() {
-        return fs.getRootDirectories();
-    }
-
-    @Override
-    public Iterable<FileStore> getFileStores() {
-        return fs.getFileStores();
-    }
-
-    @Override
-    public Set<String> supportedFileAttributeViews() {
-        return fs.supportedFileAttributeViews();
-    }
-
-    @Override
-    public Path getPath(String first, String... more) {
-        return fs.getPath(first, more);
-    }
-
-    @Override
-    public PathMatcher getPathMatcher(String syntaxAndPattern) {
-        return fs.getPathMatcher(syntaxAndPattern);
-    }
-
-    @Override
-    public UserPrincipalLookupService getUserPrincipalLookupService() {
-        return fs.getUserPrincipalLookupService();
-    }
-
-    @Override
-    public WatchService newWatchService() throws IOException {
-        return fs.newWatchService();
     }
 }
