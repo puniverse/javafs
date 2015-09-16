@@ -33,7 +33,7 @@ This is essentially a port of [fuse-jna], by Etienne Perot, from [JNA] to [JNR],
 with some code copied from [jnr-fuse], by Sergey Tselovalnikov, made to work with the standard JDK [FileSystem] API.
 
 * Differences from [fuse-jna]: this project uses [JNR] rather than [JNA].
-* Differences from [jnr-fuse]: this project support Java 7 (jnr-fuse supports only Java 8), and more platforms (like Mac).
+* Differences from [jnr-fuse]: this project supports Java 7 (jnr-fuse supports only Java 8), and more platforms (like Mac).
 * Differences from both: rather than exposing a new, specific, Java FUSE API, this project uses the standard [FileSystem] API.
 
 ## License
