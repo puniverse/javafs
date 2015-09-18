@@ -306,12 +306,13 @@ class FuseFileSystemProvider extends FuseFilesystem {
                     }
                 }
                 return n;
-            } else {
+            } else if (channel instanceof AsynchronousFileChannel) {
                 final AsynchronousFileChannel ch = ((AsynchronousFileChannel) channel);
                 int n = ch.read(buffer, offset).get();
                 assert n == size;
                 return n;
-            }
+            } else
+                throw new UnsupportedOperationException();
         } catch (Exception e) {
             return -errno(e);
         }
@@ -339,11 +340,12 @@ class FuseFileSystemProvider extends FuseFilesystem {
                     }
                 }
                 return n;
-            } else {
+            } else if (channel instanceof AsynchronousFileChannel) {
                 final AsynchronousFileChannel ch = ((AsynchronousFileChannel) channel);
                 int n = ch.write(buffer, offset).get();
                 return n;
-            }
+            } else
+                throw new UnsupportedOperationException();
         } catch (Exception e) {
             return -errno(e);
         }
@@ -396,11 +398,12 @@ class FuseFileSystemProvider extends FuseFilesystem {
             if (channel instanceof FileChannel) {
                 final FileChannel ch = ((FileChannel) channel);
                 ch.force(datasync == 0);
-            } else {
+            } else if (channel instanceof AsynchronousFileChannel) {
                 final AsynchronousFileChannel ch = ((AsynchronousFileChannel) channel);
                 ch.force(true);
                 ch.force(datasync == 0);
-            }
+            } else
+                throw new UnsupportedOperationException();
             return 0;
         } catch (Exception e) {
             return -errno(e);
