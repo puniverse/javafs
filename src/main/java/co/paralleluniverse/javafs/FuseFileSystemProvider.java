@@ -8,6 +8,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousFileChannel;
 import java.nio.channels.Channel;
 import java.nio.channels.FileChannel;
+import java.nio.channels.SeekableByteChannel;
 import java.nio.channels.FileLock;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.AccessMode;
@@ -260,7 +261,7 @@ class FuseFileSystemProvider extends FuseFilesystem {
     @Override
     protected int truncate(String path, long offset) {
         try {
-            final FileChannel ch = fsp.newFileChannel(path(path), EnumSet.of(StandardOpenOption.WRITE));
+            final SeekableByteChannel ch = fsp.newByteChannel(path(path), EnumSet.of(StandardOpenOption.WRITE));
             ch.truncate(offset);
             return 0;
         } catch (Exception e) {
@@ -271,7 +272,7 @@ class FuseFileSystemProvider extends FuseFilesystem {
     @Override
     protected int open(String path, StructFuseFileInfo info) {
         try {
-            final FileChannel channel = fsp.newFileChannel(path(path), fileInfoToOpenOptions(info));
+            final SeekableByteChannel channel = fsp.newByteChannel(path(path), fileInfoToOpenOptions(info));
             final long fh = fileHandle.incrementAndGet();
             openFiles.put(fh, channel);
             info.fh(fh);
@@ -285,8 +286,8 @@ class FuseFileSystemProvider extends FuseFilesystem {
     protected int read(String path, ByteBuffer buffer, long size, long offset, StructFuseFileInfo info) {
         try {
             final Channel channel = toChannel(info);
-            if (channel instanceof FileChannel) {
-                final FileChannel ch = ((FileChannel) channel);
+            if (channel instanceof SeekableByteChannel) {
+                final SeekableByteChannel ch = ((SeekableByteChannel) channel);
                 if (info.nonseekable())
                     assert offset == ch.position();
                 else
@@ -320,8 +321,8 @@ class FuseFileSystemProvider extends FuseFilesystem {
     protected int write(String path, ByteBuffer buffer, long size, long offset, StructFuseFileInfo info) {
         try {
             final Channel channel = toChannel(info);
-            if (channel instanceof FileChannel) {
-                final FileChannel ch = ((FileChannel) channel);
+            if (channel instanceof SeekableByteChannel) {
+                final SeekableByteChannel ch = ((SeekableByteChannel) channel);
                 if (!info.append() && !info.nonseekable())
                     ch.position(offset);
                 int n = ch.write(buffer);
@@ -496,7 +497,7 @@ class FuseFileSystemProvider extends FuseFilesystem {
         try {
             final Set<OpenOption> options = fileInfoToOpenOptions(info);
             options.add(StandardOpenOption.CREATE);
-            final FileChannel channel = fsp.newFileChannel(path(path), options);
+            final SeekableByteChannel channel = fsp.newByteChannel(path(path), options);
             final long fh = fileHandle.incrementAndGet();
             openFiles.put(fh, channel);
             info.fh(fh);
@@ -510,8 +511,8 @@ class FuseFileSystemProvider extends FuseFilesystem {
     protected int ftruncate(String path, long offset, StructFuseFileInfo info) {
         try {
             final Channel channel = toChannel(info);
-            if (channel instanceof FileChannel)
-                ((FileChannel) channel).truncate(offset);
+            if (channel instanceof SeekableByteChannel)
+                ((SeekableByteChannel) channel).truncate(offset);
             else if (channel instanceof AsynchronousFileChannel)
                 ((AsynchronousFileChannel) channel).truncate(offset);
             return 0;
