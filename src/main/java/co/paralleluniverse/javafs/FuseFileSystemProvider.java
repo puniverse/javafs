@@ -71,6 +71,7 @@ class FuseFileSystemProvider extends FuseFilesystem {
     private final ConcurrentMap<Long, Object> openFiles = new ConcurrentHashMap<>();
     private final AtomicLong fileHandle = new AtomicLong(0);
     private final boolean debug;
+    private static final long BLOCK_SIZE = 4096;
 
     public FuseFileSystemProvider(FileSystemProvider fsp, URI uri, boolean debug) {
         this.fsp = fsp;
@@ -353,16 +354,20 @@ class FuseFileSystemProvider extends FuseFilesystem {
 
     @Override
     protected int statfs(String path, StructStatvfs statvfs) {
+
         try {
-            boolean hasStore = false;
+            boolean hasStore = false; // only one store allowed
             for (FileStore store : fs.getFileStores()) {
                 if (hasStore)
                     throw new IOException("Multiple FileStores not supported");
                 hasStore = true;
 
-//                store.getUsableSpace();
-//                store.getUnallocatedSpace();
-//                store.getTotalSpace();
+                final long blockSize = BLOCK_SIZE;
+                statvfs.bsize(blockSize);
+                statvfs.blocks(store.getTotalSpace() / blockSize);
+                statvfs.bfree(store.getUnallocatedSpace() / blockSize);
+                statvfs.bavail(store.getUsableSpace() / blockSize);
+
                 long mountFlags = 0;
                 if (fs.isReadOnly())
                     mountFlags |= StructStatvfs.ST_RDONLY;
