@@ -79,8 +79,8 @@ class StructFuseOperations extends Struct {
     private final Padding flag_reserved = new Padding(NativeType.UCHAR, 1);
     private final Function<_ioctl> ioctl = function(_ioctl.class);
     private final Function<_poll> poll = function(_poll.class);
-    private final Function<_write_buf> write_buf = function(_write_buf.class);
-    private final Function<_read_buf> read_buf = function(_read_buf.class);
+    private final Pointer write_buf = new Pointer();
+    private final Pointer read_buf = new Pointer();
     private final Function<_flock> flock = function(_flock.class);
     private final Function<_fallocate> fallocate = function(_fallocate.class);
     
@@ -135,8 +135,6 @@ class StructFuseOperations extends Struct {
         bmap.set(filesystem);
         ioctl.set(filesystem);
         poll.set(filesystem);
-        write_buf.set(null); // TODO: implement
-        read_buf.set(null);  // TODO: implement
         flock.set(filesystem);
         fallocate.set(filesystem);
     }
