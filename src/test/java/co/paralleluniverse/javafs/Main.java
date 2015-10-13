@@ -1,8 +1,11 @@
 package co.paralleluniverse.javafs;
 
 import com.google.common.jimfs.Jimfs;
+
 import java.nio.file.FileSystem;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Main {
     public static void main(final String... args) throws Exception {
@@ -23,7 +26,10 @@ public class Main {
             System.out.println("Mounting filesystem " + fs + " at " + mountPoint + (readonly ? " READONLY" : ""));
             System.out.println("========================");
             
-            JavaFS.mount(fs, Paths.get(mountPoint), readonly, true);
+            Map<String, String> options = new HashMap<>();
+            options.put("fsname", fs.getClass().getSimpleName() + "@" + System.currentTimeMillis());
+            
+            JavaFS.mount(fs, Paths.get(mountPoint), readonly, true, options);
             Thread.sleep(Long.MAX_VALUE);
         } catch (IllegalArgumentException e) {
             System.err.println("Usage: JavaFS [-r] <mountpoint> [<zipfile>]");

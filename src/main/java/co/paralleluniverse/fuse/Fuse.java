@@ -5,12 +5,15 @@ import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.Random;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
+
 import jnr.ffi.Struct;
 
 public final class Fuse {
@@ -112,7 +115,7 @@ public final class Fuse {
         }
     }
 
-    public static void mount(FuseFilesystem filesystem, Path mountPoint, boolean blocking, boolean debug) throws IOException {
+    public static void mount(FuseFilesystem filesystem, Path mountPoint, boolean blocking, boolean debug, Map<String, String> mountOptions) throws IOException {
         mountPoint = mountPoint.toAbsolutePath().normalize().toRealPath();
         if (!Files.isDirectory(mountPoint))
             throw new NotDirectoryException(mountPoint.toString());
@@ -127,19 +130,21 @@ public final class Fuse {
         filesystem.mount(mountPoint, blocking);
 
         final String filesystemName = filesystem.getFuseName();
-        final String[] options = filesystem.getOptions();
+        final String[] options = toOptionsArray(mountOptions);
         final String[] argv;
         if (options == null)
             argv = new String[debug ? 4 : 3];
         else {
-            argv = new String[3 + options.length];
-            System.arraycopy(options, 0, argv, 2, options.length);
+            argv = new String[(debug ? 4 : 3) + options.length];
+            System.arraycopy(options, 0, argv, (debug ? 3 : 2), options.length);
         }
+        
         argv[0] = filesystemName;
         argv[1] = "-f";
         if (debug)
             argv[2] = "-d";
         argv[argv.length - 1] = mountPoint.toString();
+        
         final LibFuse fuse = init();
         final StructFuseOperations operations = new StructFuseOperations(jnr.ffi.Runtime.getRuntime(fuse), filesystem);
 
@@ -206,5 +211,21 @@ public final class Fuse {
         final int res = process.getReturnCode();
         if (res != 0)
             throw new FuseException(res);
+    }
+    
+    private static String[] toOptionsArray(Map<String, String> options) {
+        if (options == null) {
+            return null;
+        }
+
+        int i = 0;
+        String[] values = new String[options.size() * 2];
+        for (Entry<String, String> entry : options.entrySet()) {
+            values[i++] = "-o";
+            values[i++] = entry.getKey()
+                    + (entry.getValue() == null ? "" : "=" + entry.getValue());
+        }
+
+        return values;
     }
 }
