@@ -1,4 +1,4 @@
-# JavaFS
+# JavaFS [![Version](http://img.shields.io/badge/version-0.1.0-blue.svg?style=flat)](https://github.com/puniverse/javafs/releases)
 ## Java filesystems as FUSE
 
 ## Requirements
