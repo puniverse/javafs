@@ -1,6 +1,6 @@
 package co.paralleluniverse.fuse;
 
-final class ErrorCodes {
+public final class ErrorCodes {
     private static final class ErrorCodesBSD implements IErrorCodes {
         @Override public int E2BIG()         { return 7; }
         @Override public int EACCES()        { return 13; }
