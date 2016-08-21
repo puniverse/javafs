@@ -71,18 +71,26 @@ final class Platform {
                             libFuse = LibraryLoader.create(LibFuse.class).failImmediately().load("fuse");
                         }
                         break;
-                    default:
-                        if (p.getCPU() == CPU.X86_64)
-                            platform = PlatformEnum.LINUX_X86_64;
-                        else if(p.getCPU() == CPU.I386)
-                            platform = PlatformEnum.LINUX_I686;
-                        else if(p.getCPU() == CPU.ARM)
-                            platform = PlatformEnum.LINUX_ARM;
-                        else
-                            platform = PlatformEnum.LINUX_PPC;
 
-                        libFuse = LibraryLoader.create(LibFuse.class).failImmediately().load("fuse");
+                    case LINUX:
+                        LibraryLoader<LibFuse> libraryLoader = LibraryLoader.create(LibFuse.class);
+                        if (p.getCPU() == CPU.X86_64) {
+                            libraryLoader.search("/lib/x86_64-linux-gnu");
+                            platform = PlatformEnum.LINUX_X86_64;
+                        } else if(p.getCPU() == CPU.I386) {
+                            libraryLoader.search("/lib/i386-linux-gnu");
+                            platform = PlatformEnum.LINUX_I686;
+                        } else if(p.getCPU() == CPU.ARM) {
+                            platform = PlatformEnum.LINUX_ARM;
+                        } else {
+                            platform = PlatformEnum.LINUX_PPC;
+                        }
+
+                        libFuse = libraryLoader.failImmediately().load("fuse");
                         break;
+
+                    default:
+                        throw new RuntimeException("Unsupported Platform");
                 }
             }
         } finally {
