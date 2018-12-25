@@ -305,8 +305,11 @@ class FuseFileSystemProvider extends FuseFilesystem {
                             n += c;
                         }
                     }
+                     return n;
+                }else{
+                    return 0; // we did not read any bytes
                 }
-                return n;
+               
             } else if (channel instanceof AsynchronousFileChannel) {
                 final AsynchronousFileChannel ch = ((AsynchronousFileChannel) channel);
                 int n = ch.read(buffer, offset).get();
