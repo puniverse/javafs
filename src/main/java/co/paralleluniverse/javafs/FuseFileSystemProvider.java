@@ -538,21 +538,6 @@ class FuseFileSystemProvider extends FuseFilesystem {
     protected int lock(String path, StructFuseFileInfo info, int command, StructFlock flock) {
         try {
             throw new UnsupportedOperationException();
-//            if (command == StructFlock.CMD_GETLK)
-//                throw new UnsupportedOperationException();
-//
-//            final Channel channel = toChannel(info);
-//            if (channel instanceof FileChannel) {
-//                FileChannel ch = (FileChannel) channel;
-//                switch (command) {
-//                    case StructFlock.CMD_SETLK:
-//                        FileLock lock = ch.lock(flock.start(), flock.len(), false);
-//                        lock.
-//                }
-//            } else if (channel instanceof AsynchronousFileChannel) {
-//                AsynchronousFileChannel ch = (AsynchronousFileChannel) channel;
-//            }
-//            return 0;
         } catch (Exception e) {
             return -errno(e);
         }

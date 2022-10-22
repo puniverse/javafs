@@ -34,6 +34,7 @@ import jnr.ffi.mapper.FromNativeContext;
 import jnr.ffi.mapper.FromNativeConverter;
 import jnr.ffi.provider.ClosureManager;
 import java.util.Collections;
+import java.util.Map;
 
 public class ClosureHelper {
     public static ClosureHelper getInstance() {
@@ -51,14 +52,17 @@ public class ClosureHelper {
         try {
             final ClosureManager closureManager = Runtime.getSystemRuntime().getClosureManager();
 
-            final AsmClassLoader cl = (AsmClassLoader) accessible(NativeClosureManager.class.getDeclaredField("classLoader")).get(closureManager);
-            final CompositeTypeMapper ctm = (CompositeTypeMapper) accessible(NativeClosureManager.class.getDeclaredField("typeMapper")).get(closureManager);
+            final Map<ClassLoader,AsmClassLoader> asmClassLoaderMap = (Map<ClassLoader,AsmClassLoader>)
+                    accessible(NativeClosureManager.class.getDeclaredField("asmClassLoaders")).get(closureManager);
+            final CompositeTypeMapper ctm = (CompositeTypeMapper)
+                    accessible(NativeClosureManager.class.getDeclaredField("typeMapper")).get(closureManager);
             this.ctx = new SimpleNativeContext(Runtime.getSystemRuntime(), (Collection<Annotation>) Collections.EMPTY_LIST);
             this.cache = new ClassValue<FromNativeConverter<?, Pointer>>() {
                 @Override
                 protected FromNativeConverter<?, Pointer> computeValue(Class<?> closureClass) {
                     return ClosureFromNativeConverter.
-                            getInstance(Runtime.getSystemRuntime(), DefaultSignatureType.create(closureClass, (FromNativeContext) ctx), cl, ctm);
+                            getInstance(Runtime.getSystemRuntime(), DefaultSignatureType.create(closureClass,
+                                    (FromNativeContext) ctx), asmClassLoaderMap.get(getClass().getClassLoader()), ctm);
                 }
             };
         } catch (Exception e) {
