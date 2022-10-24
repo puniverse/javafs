@@ -3,6 +3,8 @@ package co.paralleluniverse.fuse;
 import jnr.ffi.provider.jffi.ClosureHelper;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
+import java.util.logging.Logger;
+
 import jnr.ffi.Pointer;
 import jnr.ffi.annotations.In;
 import jnr.ffi.annotations.Out;
@@ -25,6 +27,8 @@ class Filesystem implements
         _opendir, _readdir, _releasedir, _fsyncdir,
         _init, _destroy, _access, _create, _ftruncate, _utimens, _bmap,
         _ioctl, _poll, _write_buf, _read_buf, _flock, _fallocate {
+    private final Logger logger = Logger.getLogger(getClass().getCanonicalName());
+
     private final FuseFilesystem fs;
 
     public Filesystem(FuseFilesystem fs) {
@@ -179,9 +183,14 @@ class Filesystem implements
 
     @Override
     public final int _readdir(String path, Pointer buf, Pointer fillFunction, @off_t long offset, @In Pointer info) {
-        return fs.readdir(path,
-                new StructFuseFileInfo(info, path),
-                new DirectoryFillerImpl(buf, ClosureHelper.getInstance().fromNative(fillFunction, DirectoryFillerImpl.fuse_fill_dir_t.class)));
+        try {
+            return fs.readdir(path,
+                    new StructFuseFileInfo(info, path),
+                    new DirectoryFillerImpl(buf, ClosureHelper.getInstance().fromNative(fillFunction, DirectoryFillerImpl.fuse_fill_dir_t.class)));
+        } catch (Error e) {
+            logger.severe(e.getMessage());
+            return 1;
+        }
     }
 
     @Override

@@ -5,7 +5,6 @@
  */
 package co.paralleluniverse.javafs;
 
-import co.paralleluniverse.javafs.JavaFS;
 import com.google.common.jimfs.Jimfs;
 import static com.google.common.truth.Truth.assert_;
 import java.io.DataInputStream;

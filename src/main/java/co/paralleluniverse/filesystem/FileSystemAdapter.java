@@ -19,13 +19,6 @@ public abstract class FileSystemAdapter extends FileSystem {
         this.fsp = fsp;
     }
 
-//    protected FileSystemAdapter(FileSystem fs) {
-//        this.fs = fs;
-//        this.fsp = wrapFileSystemProvider(fs.provider());
-//    }
-//    protected FileSystemProvider wrapFileSystemProvider(FileSystemProvider fsp) {
-//        return fsp;
-//    }
     @Override
     public String toString() {
         return fs.toString();

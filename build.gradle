@@ -28,12 +28,12 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.jnr:jnr-ffi:2.0.3'    
-    compile 'com.github.jnr:jnr-posix:3.0.17'
+    compile 'com.github.jnr:jnr-ffi:2.2.12'
+    compile 'com.github.jnr:jnr-posix:3.1.15'
     
     testCompile 'junit:junit:4.12'
     testCompile 'org.truth0:truth:0.23'
-    testCompile 'com.google.jimfs:jimfs:1.0'
+    testCompile 'com.google.jimfs:jimfs:1.2'
 }
 
 tasks.withType(JavaExec) {
@@ -119,11 +119,6 @@ uploadArchives {
         }
     }
 }
-
-task wrapper(type: Wrapper) {
-    gradleVersion = '2.4'
-}
-
 
 task('run', type: JavaExec, dependsOn:[testClasses]) {
     classpath = sourceSets.main.runtimeClasspath + sourceSets.test.runtimeClasspath
